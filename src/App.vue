@@ -37,13 +37,22 @@
       };
     },
     created() {
-      const url = debug ? '/api/seller' : 'http://ustbhuangyi.com/sell/api/seller';
+      const url = debug ? 'http://localhost:8084/business/seller' : '/sell/business/business/seller';
+      this.$http.get(url).then((response) => {
+        console.log(response);
+        response = response.body;
+        if (response.code === ERR_OK) {
+          this.seller = Object.assign({}, this.seller, response.data);
+        }
+      });
+      /* const url = debug ? '/api/seller' : 'http://ustbhuangyi.com/sell/api/seller';
       this.$http.get(url + '?id=' + this.seller.id).then((response) => {
+        console.log(response);
         response = response.body;
         if (response.errno === ERR_OK) {
           this.seller = Object.assign({}, this.seller, response.data);
         }
-      });
+      }); */
     },
     components: {
       'v-header': header

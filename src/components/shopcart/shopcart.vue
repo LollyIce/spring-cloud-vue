@@ -52,6 +52,16 @@
     <transition name="fade">
       <div class="list-mask" @click="hideList" v-show="listShow"></div>
     </transition>
+      <div>
+    <a-modal v-model="visible" title="手机号登录" onOk="handleOk">
+      <template slot="footer">
+        <a-button key="back" @click="handleCancel">取消</a-button>
+        <a-button key="submit" type="primary"  @click="handleOk">
+          登录
+        </a-button>
+      </template>
+    </a-modal>
+  </div>
   </div>
 </template>
 
@@ -83,6 +93,9 @@
     },
     data() {
       return {
+        checkNick: false,
+        visible: false,
+        confirmLoading: false,
         balls: [
           {
             show: false
@@ -157,6 +170,28 @@
       }
     },
     methods: {
+      handleCancel() {
+        this.visible = false;
+      },
+      handleOk() {
+        this.visible = false;
+      },
+      check() {
+      this.form.validateFields(err => {
+        if (!err) {
+          console.info('success');
+        }
+      });
+    },
+    handleChange(e) {
+      this.checkNick = e.target.checked;
+      this.$nextTick(() => {
+        this.form.validateFields(['nickname'], { force: true });
+      });
+    },
+      showModal() {
+        this.visible = true;
+      },
       drop(el) {
         for (let i = 0; i < this.balls.length; i++) {
           let ball = this.balls[i];
@@ -186,7 +221,8 @@
         if (this.totalPrice < this.minPrice) {
           return;
         }
-        window.alert(`支付${this.totalPrice}元`);
+        /* window.alert(`支付${this.totalPrice}元`); */
+        this.showModal();
       },
       addFood(target) {
         this.drop(target);

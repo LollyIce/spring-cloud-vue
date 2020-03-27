@@ -96,10 +96,22 @@
     created() {
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
 
-      const url = debug ? '/api/goods' : 'http://ustbhuangyi.com/sell/api/goods';
+     /*  const url = debug ? '/api/goods' : 'http://ustbhuangyi.com/sell/api/goods';
       this.$http.get(url).then((response) => {
         response = response.body;
         if (response.errno === ERR_OK) {
+          this.goods = response.data;
+          this.$nextTick(() => {
+            this._initScroll();
+            this._calculateHeight();
+          });
+        }
+      }); */
+       const url = debug ? 'http://localhost:8082/product/list' : '/sell/product/product/list';
+      this.$http.get(url).then((response) => {
+        console.log(response);
+        response = response.body;
+        if (response.code === ERR_OK) {
           this.goods = response.data;
           this.$nextTick(() => {
             this._initScroll();

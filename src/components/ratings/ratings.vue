@@ -80,10 +80,22 @@
       };
     },
     created() {
-      const url = debug ? '/api/ratings' : 'http://ustbhuangyi.com/sell/api/ratings';
+      /* const url = debug ? '/api/ratings' : 'http://ustbhuangyi.com/sell/api/ratings';
       this.$http.get(url).then((response) => {
         response = response.body;
         if (response.errno === ERR_OK) {
+          this.ratings = response.data;
+          this.$nextTick(() => {
+            this.scroll = new BScroll(this.$refs.ratings, {
+              click: true
+            });
+          });
+        }
+      }); */
+       const url = debug ? 'http://localhost:8083/user/ratings' : '/sell/user/user/ratings';
+      this.$http.get(url).then((response) => {
+        response = response.body;
+        if (response.code === ERR_OK) {
           this.ratings = response.data;
           this.$nextTick(() => {
             this.scroll = new BScroll(this.$refs.ratings, {

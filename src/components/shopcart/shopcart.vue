@@ -53,13 +53,28 @@
       <div class="list-mask" @click="hideList" v-show="listShow"></div>
     </transition>
       <div>
-    <a-modal v-model="visible" title="手机号登录" onOk="handleOk">
-      <template slot="footer">
-        <a-button key="back" @click="handleCancel">取消</a-button>
-        <a-button key="submit" type="primary"  @click="handleOk">
-          登录
-        </a-button>
-      </template>
+    <a-modal v-model="visible" title="手机号登录" onOk="handleOk" :footer="null">
+         <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" @submit="handleSubmit">
+            <a-form-item label="手机号">
+                  <a-input v-decorator="['phoneNums', { rules: [{ required: true, message: '请输入手机号码!' }] }]" placeholder="请输入手机号码"/>
+            </a-form-item>
+            <a-row>
+              <a-col :span="12" :offset="5">
+                  <a-input v-decorator="['code', { rules: [{ required: true, message: '请输入验证码!' }] }]" placeholder="请输入手机验证码" />
+              </a-col>
+              <a-col :span="6" :offset="1">
+                <a-button type="primary" @click="getCode" :disabled="btnStatus">
+                    {{codeMsg}}
+                 </a-button>
+              </a-col>
+            </a-row>
+            <br/>
+            <a-form-item :wrapper-col="{ span: 12, offset: 6 }">
+              <a-button type="primary" html-type="submit">
+                登录
+              </a-button>
+            </a-form-item>
+         </a-form>
     </a-modal>
   </div>
   </div>
@@ -93,9 +108,12 @@
     },
     data() {
       return {
+        form: this.$form.createForm(this, { name: 'coordinated' }),
         checkNick: false,
         visible: false,
         confirmLoading: false,
+        codeMsg: '获取验证码',
+        btnStatus: false,
         balls: [
           {
             show: false
@@ -170,11 +188,26 @@
       }
     },
     methods: {
-      handleCancel() {
-        this.visible = false;
+      handleSubmit() {
       },
-      handleOk() {
-        this.visible = false;
+      getCode() {
+        this.form.validateFields(['phoneNums'], (errors, values) => {
+        });
+        this.btnStatus = true;
+        let time = 3;
+        var interval = null;
+        let _this = this;
+        interval = setInterval(function () {
+          _this.codeMsg = time + 's';
+          if (time <= 0) {
+            _this.btnStatus = false;
+            _this.codeMsg = '获取验证码';
+            clearInterval(interval);
+          }
+          time--;
+        }, 1000);
+        this.$http.get('/sell/user/login/buyerPhoneSMS').then((response) => {
+        });
       },
       check() {
       this.form.validateFields(err => {
@@ -221,8 +254,16 @@
         if (this.totalPrice < this.minPrice) {
           return;
         }
-        /* window.alert(`支付${this.totalPrice}元`); */
         this.showModal();
+        this.$http.get('/sell/user/login/checkLogin').then((response) => {
+          response = response.body;
+            this.showModal();
+           if (response.code === 401) {
+              this.showModal();
+           } else {
+              window.alert(`支付${this.totalPrice}元`);
+           }
+        });
       },
       addFood(target) {
         this.drop(target);

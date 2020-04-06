@@ -59,14 +59,16 @@
                   <a-input v-decorator="['phoneNums', { rules: [{ required: true, message: '请输入手机号码!' }] }]" placeholder="请输入手机号码"/>
             </a-form-item>
             <a-row>
-              <a-col :span="12" :offset="5">
+            <a-form-item>
+              <a-col :span="15" :offset="4">
                   <a-input v-decorator="['code', { rules: [{ required: true, message: '请输入验证码!' }] }]" placeholder="请输入手机验证码" />
               </a-col>
-              <a-col :span="6" :offset="1">
+              <a-col :span="3" :offset="2">
                 <a-button type="primary" @click="getCode" :disabled="btnStatus">
                     {{codeMsg}}
                  </a-button>
               </a-col>
+              </a-form-item>
             </a-row>
             <br/>
             <a-form-item :wrapper-col="{ span: 12, offset: 6 }">
@@ -189,24 +191,40 @@
     },
     methods: {
       handleSubmit() {
+        this.form.validateFields(['phoneNums', 'code'], (errors, values) => {
+          if (errors == null) {
+            /* 允许浏览器处理cookie */
+            var xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+            let _this = this;
+              this.$axios.get('http://localhost:8083/login/buyerPhoneLogin', {params: values}).then(function(response) {
+                console.log(response);
+              _this.visible = false;
+              window.alert(`支付${this.totalPrice}元`);
+              });
+          }
+        });
       },
       getCode() {
         this.form.validateFields(['phoneNums'], (errors, values) => {
-        });
-        this.btnStatus = true;
-        let time = 3;
-        var interval = null;
-        let _this = this;
-        interval = setInterval(function () {
-          _this.codeMsg = time + 's';
-          if (time <= 0) {
+          if (errors == null) {
+            let time = 60;
+            var interval = null;
+            let _this = this;
+            /* /sell/user/login/buyerPhoneSMS */
+            this.$http.get('http://localhost:8083/login/buyerPhoneSMS', {params: values}).then((response) => {
+            interval = setInterval(function () {
+            _this.btnStatus = true;
+            _this.codeMsg = time + 's';
+            if (time <= 0) {
             _this.btnStatus = false;
-            _this.codeMsg = '获取验证码';
+            _this.codeMsg = '重新发送验证码';
             clearInterval(interval);
+            }
+              time--;
+            }, 1000);
+            });
           }
-          time--;
-        }, 1000);
-        this.$http.get('/sell/user/login/buyerPhoneSMS').then((response) => {
         });
       },
       check() {
@@ -254,10 +272,9 @@
         if (this.totalPrice < this.minPrice) {
           return;
         }
-        this.showModal();
-        this.$http.get('/sell/user/login/checkLogin').then((response) => {
-          response = response.body;
-            this.showModal();
+        /* /sell/user/login/checkLogin */
+        this.$axios.get('http://localhost:8083/login/checkLogin').then((response) => {
+          response = response.data;
            if (response.code === 401) {
               this.showModal();
            } else {
